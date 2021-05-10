@@ -1,0 +1,40 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package model;
+
+import java.io.Serializable;
+
+/**
+ *
+ * @author Daniel
+ */
+public class Tag implements Serializable{
+    private int idtag;
+    private String TagName;
+
+    public Tag(int idtag, String TagName) {
+        this.idtag = idtag;
+        this.TagName = TagName;
+    }
+
+    public int getIdtag() {
+        return idtag;
+    }
+
+    public void setIdtag(int idtag) {
+        this.idtag = idtag;
+    }
+
+    public String getTagName() {
+        return TagName;
+    }
+
+    public void setTagName(String TagName) {
+        this.TagName = TagName;
+    }
+      
+    
+}
