@@ -17,7 +17,7 @@ import model.Person;
 
 public class addPersonPanel extends javax.swing.JFrame {
     private Person person = null;
-     private final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
      * Creates new form addPersonPanel
@@ -29,9 +29,9 @@ public class addPersonPanel extends javax.swing.JFrame {
     public void setPerson(Person person){
         this.person = person;
         
-        name.setText(person.getFamilyname());
-        firstname.setText(person.getFirstname());
-        dateofbirth.setText(fmt.format(person.getDateofbirth()));
+        name.setText(person.getLastName());
+        firstname.setText(person.getFirstName());
+        dateofbirth.setText(fmt.format(person.getDateOfBirth()));
     }
     
     public Person getPerson(){
@@ -39,10 +39,10 @@ public class addPersonPanel extends javax.swing.JFrame {
             person = new Person();
         }
         
-        person.setFamilyname(name.getText());
-        person.setFirstname(firstname.getText());
+        person.setLastName(name.getText());
+        person.setFirstName(firstname.getText());
         try {
-            person.setDateofbirth(fmt.parse(dateofbirth.getText()));
+            person.setDateOfBirth(fmt.parse(dateofbirth.getText()));
         } catch (ParseException ex) {
             Logger.getLogger(addPersonPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
