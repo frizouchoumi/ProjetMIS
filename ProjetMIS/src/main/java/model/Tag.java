@@ -6,6 +6,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  *
@@ -14,6 +15,7 @@ import java.io.Serializable;
 public class Tag implements Serializable{
     private int idtag;
     private String TagName;
+    private List<FileTags> filetagsList;
 
     public Tag(int idtag, String TagName) {
         this.idtag = idtag;
@@ -36,5 +38,12 @@ public class Tag implements Serializable{
         this.TagName = TagName;
     }
       
+    public List<FileTags> getFileTagsList() {
+        return filetagsList;
+    }
+
+    public void setFileTagsList(List<FileTags> filetagsList) {
+        this.filetagsList = filetagsList;
+    }
     
 }

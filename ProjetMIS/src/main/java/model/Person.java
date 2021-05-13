@@ -15,14 +15,19 @@ import java.util.List;
  */
 public class Person implements Serializable{
     private int idperson;
-    private String Name;
+    private String FirstName;
+    private String LastName;
     private Date DateOfBirth; /*Year/Month/Day*/
     private List<Doctor> doctorList;
     private List<Patient> patientList;
 
-    public Person(int id, String Name, Date DateOfBirth) {
+    public Person(){
+        
+    }
+    public Person(int id, String FirstName, String LastName, Date DateOfBirth) {
         this.idperson = idperson;
-        this.Name = Name;
+        this.FirstName = FirstName;
+        this.LastName = LastName;
         this.DateOfBirth = DateOfBirth;
     }
 
@@ -34,14 +39,22 @@ public class Person implements Serializable{
         this.idperson= idperson;
     }
 
-    public String getName() {
-        return Name;
+    public String getFirstName() {
+        return FirstName;
     }
 
-    public void setName(String Name) {
-        this.Name = Name;
+    public void setFirstName(String FirstName) {
+        this.FirstName = FirstName;
     }
 
+    public String getLastName() {
+        return LastName;
+    }
+
+    public void setLastName(String LastName) {
+        this.LastName = LastName;
+    }
+    
     public Date getDateOfBirth() {
         return DateOfBirth;
     }

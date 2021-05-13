@@ -6,7 +6,7 @@
 package model;
 
 import java.io.Serializable;
-
+import java.util.List;
 /**
  *
  * @author Elise
@@ -17,6 +17,7 @@ public class File implements Serializable{
     private String type;
     private Doctor iddoctor;
     private Patient idpatient;
+    private List<FileTags> filetagsList;
 
     public File(int idfile, String path, String type) {
         this.idfile = idfile;
@@ -63,7 +64,14 @@ public class File implements Serializable{
     public void setIdpatient(Patient idpatient) {
         this.idpatient = idpatient;
     }
-    
+
+    public List<FileTags> getFileTagsList() {
+        return filetagsList;
+    }
+
+    public void setFileTagsList(List<FileTags> filetagsList) {
+        this.filetagsList = filetagsList;
+    }
     
     
 }
