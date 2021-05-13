@@ -11,7 +11,6 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import model.Person;
-import model.Image;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -37,9 +36,6 @@ public class PatientJpaController implements Serializable {
     }
 
     public void create(Patient patient) {
-        if (patient.getImageList() == null) {
-            patient.setImageList(new ArrayList<Image>());
-        }
         if (patient.getFileList() == null) {
             patient.setFileList(new ArrayList<File>());
         }
@@ -52,12 +48,6 @@ public class PatientJpaController implements Serializable {
                 idperson = em.getReference(idperson.getClass(), idperson.getIdperson());
                 patient.setIdperson(idperson);
             }
-            List<Image> attachedImageList = new ArrayList<Image>();
-            for (Image imageListImageToAttach : patient.getImageList()) {
-                imageListImageToAttach = em.getReference(imageListImageToAttach.getClass(), imageListImageToAttach.getIdimage());
-                attachedImageList.add(imageListImageToAttach);
-            }
-            patient.setImageList(attachedImageList);
             List<File> attachedFileList = new ArrayList<File>();
             for (File fileListFileToAttach : patient.getFileList()) {
                 fileListFileToAttach = em.getReference(fileListFileToAttach.getClass(), fileListFileToAttach.getIdfile());
@@ -68,15 +58,6 @@ public class PatientJpaController implements Serializable {
             if (idperson != null) {
                 idperson.getPatientList().add(patient);
                 idperson = em.merge(idperson);
-            }
-            for (Image imageListImage : patient.getImageList()) {
-                Patient oldIdpatientOfImageListImage = imageListImage.getIdpatient();
-                imageListImage.setIdpatient(patient);
-                imageListImage = em.merge(imageListImage);
-                if (oldIdpatientOfImageListImage != null) {
-                    oldIdpatientOfImageListImage.getImageList().remove(imageListImage);
-                    oldIdpatientOfImageListImage = em.merge(oldIdpatientOfImageListImage);
-                }
             }
             for (File fileListFile : patient.getFileList()) {
                 Patient oldIdpatientOfFileListFile = fileListFile.getIdpatient();
@@ -103,8 +84,6 @@ public class PatientJpaController implements Serializable {
             Patient persistentPatient = em.find(Patient.class, patient.getIdpatient());
             Person idpersonOld = persistentPatient.getIdperson();
             Person idpersonNew = patient.getIdperson();
-            List<Image> imageListOld = persistentPatient.getImageList();
-            List<Image> imageListNew = patient.getImageList();
             List<File> fileListOld = persistentPatient.getFileList();
             List<File> fileListNew = patient.getFileList();
             List<String> illegalOrphanMessages = null;
@@ -123,13 +102,6 @@ public class PatientJpaController implements Serializable {
                 idpersonNew = em.getReference(idpersonNew.getClass(), idpersonNew.getIdperson());
                 patient.setIdperson(idpersonNew);
             }
-            List<Image> attachedImageListNew = new ArrayList<Image>();
-            for (Image imageListNewImageToAttach : imageListNew) {
-                imageListNewImageToAttach = em.getReference(imageListNewImageToAttach.getClass(), imageListNewImageToAttach.getIdimage());
-                attachedImageListNew.add(imageListNewImageToAttach);
-            }
-            imageListNew = attachedImageListNew;
-            patient.setImageList(imageListNew);
             List<File> attachedFileListNew = new ArrayList<File>();
             for (File fileListNewFileToAttach : fileListNew) {
                 fileListNewFileToAttach = em.getReference(fileListNewFileToAttach.getClass(), fileListNewFileToAttach.getIdfile());
@@ -145,23 +117,6 @@ public class PatientJpaController implements Serializable {
             if (idpersonNew != null && !idpersonNew.equals(idpersonOld)) {
                 idpersonNew.getPatientList().add(patient);
                 idpersonNew = em.merge(idpersonNew);
-            }
-            for (Image imageListOldImage : imageListOld) {
-                if (!imageListNew.contains(imageListOldImage)) {
-                    imageListOldImage.setIdpatient(null);
-                    imageListOldImage = em.merge(imageListOldImage);
-                }
-            }
-            for (Image imageListNewImage : imageListNew) {
-                if (!imageListOld.contains(imageListNewImage)) {
-                    Patient oldIdpatientOfImageListNewImage = imageListNewImage.getIdpatient();
-                    imageListNewImage.setIdpatient(patient);
-                    imageListNewImage = em.merge(imageListNewImage);
-                    if (oldIdpatientOfImageListNewImage != null && !oldIdpatientOfImageListNewImage.equals(patient)) {
-                        oldIdpatientOfImageListNewImage.getImageList().remove(imageListNewImage);
-                        oldIdpatientOfImageListNewImage = em.merge(oldIdpatientOfImageListNewImage);
-                    }
-                }
             }
             for (File fileListNewFile : fileListNew) {
                 if (!fileListOld.contains(fileListNewFile)) {
@@ -218,11 +173,6 @@ public class PatientJpaController implements Serializable {
             if (idperson != null) {
                 idperson.getPatientList().remove(patient);
                 idperson = em.merge(idperson);
-            }
-            List<Image> imageList = patient.getImageList();
-            for (Image imageListImage : imageList) {
-                imageListImage.setIdpatient(null);
-                imageListImage = em.merge(imageListImage);
             }
             em.remove(patient);
             em.getTransaction().commit();

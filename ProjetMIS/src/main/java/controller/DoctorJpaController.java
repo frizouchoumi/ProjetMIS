@@ -11,7 +11,6 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import model.Person;
-import model.Image;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -37,9 +36,6 @@ public class DoctorJpaController implements Serializable {
     }
 
     public void create(Doctor doctor) {
-        if (doctor.getImageList() == null) {
-            doctor.setImageList(new ArrayList<Image>());
-        }
         if (doctor.getFileList() == null) {
             doctor.setFileList(new ArrayList<File>());
         }
@@ -52,12 +48,6 @@ public class DoctorJpaController implements Serializable {
                 idperson = em.getReference(idperson.getClass(), idperson.getIdperson());
                 doctor.setIdperson(idperson);
             }
-            List<Image> attachedImageList = new ArrayList<Image>();
-            for (Image imageListImageToAttach : doctor.getImageList()) {
-                imageListImageToAttach = em.getReference(imageListImageToAttach.getClass(), imageListImageToAttach.getIdimage());
-                attachedImageList.add(imageListImageToAttach);
-            }
-            doctor.setImageList(attachedImageList);
             List<File> attachedFileList = new ArrayList<File>();
             for (File fileListFileToAttach : doctor.getFileList()) {
                 fileListFileToAttach = em.getReference(fileListFileToAttach.getClass(), fileListFileToAttach.getIdfile());
@@ -69,19 +59,10 @@ public class DoctorJpaController implements Serializable {
                 idperson.getDoctorList().add(doctor);
                 idperson = em.merge(idperson);
             }
-            for (Image imageListImage : doctor.getImageList()) {
-                Doctor oldIddoctorOfImageListImage = imageListImage.getIddoctor();
-                imageListImage.setIddoctor(doctor);
-                imageListImage = em.merge(imageListImage);
-                if (oldIddoctorOfImageListImage != null) {
-                    oldIddoctorOfImageListImage.getImageList().remove(imageListImage);
-                    oldIddoctorOfImageListImage = em.merge(oldIddoctorOfImageListImage);
-                }
-            }
-            for (File fileListAppointment : doctor.getFileList()) {
+            for (File fileListFile : doctor.getFileList()) {
                 Doctor oldIddoctorOfFileListFile = fileListFile.getIddoctor();
-                fileListAppointment.setIddoctor(doctor);
-                fileListAppointment = em.merge(fileListFile);
+                fileListFile.setIddoctor(doctor);
+                fileListFile= em.merge(fileListFile);
                 if (oldIddoctorOfFileListFile != null) {
                     oldIddoctorOfFileListFile.getFileList().remove(fileListFile);
                     oldIddoctorOfFileListFile = em.merge(oldIddoctorOfFileListFile);
@@ -103,8 +84,6 @@ public class DoctorJpaController implements Serializable {
             Doctor persistentDoctor = em.find(Doctor.class, doctor.getIddoctor());
             Person idpersonOld = persistentDoctor.getIdperson();
             Person idpersonNew = doctor.getIdperson();
-            List<Image> imageListOld = persistentDoctor.getImageList();
-            List<Image> imageListNew = doctor.getImageList();
             List<File> fileListOld = persistentDoctor.getFileList();
             List<File> fileListNew = doctor.getFileList();
             List<String> illegalOrphanMessages = null;
@@ -123,20 +102,13 @@ public class DoctorJpaController implements Serializable {
                 idpersonNew = em.getReference(idpersonNew.getClass(), idpersonNew.getIdperson());
                 doctor.setIdperson(idpersonNew);
             }
-            List<Image> attachedImageListNew = new ArrayList<Image>();
-            for (Image imageListNewImageToAttach : imageListNew) {
-                imageListNewImageToAttach = em.getReference(imageListNewImageToAttach.getClass(), imageListNewImageToAttach.getIdimage());
-                attachedImageListNew.add(imageListNewImageToAttach);
-            }
-            imageListNew = attachedImageListNew;
-            doctor.setImageList(imageListNew);
             List<File> attachedFileListNew = new ArrayList<File>();
             for (File fileListNewFileToAttach : fileListNew) {
                 fileListNewFileToAttach = em.getReference(fileListNewFileToAttach.getClass(), fileListNewFileToAttach.getIdfile());
                 attachedFileListNew.add(fileListNewFileToAttach);
             }
             fileListNew = attachedFileListNew;
-            doctor.setAppointmentList(fileListNew);
+            doctor.setFileList(fileListNew);
             doctor = em.merge(doctor);
             if (idpersonOld != null && !idpersonOld.equals(idpersonNew)) {
                 idpersonOld.getDoctorList().remove(doctor);
@@ -145,23 +117,6 @@ public class DoctorJpaController implements Serializable {
             if (idpersonNew != null && !idpersonNew.equals(idpersonOld)) {
                 idpersonNew.getDoctorList().add(doctor);
                 idpersonNew = em.merge(idpersonNew);
-            }
-            for (Image imageListOldImage : imageListOld) {
-                if (!imageListNew.contains(imageListOldImage)) {
-                    imageListOldImage.setIddoctor(null);
-                    imageListOldImage = em.merge(imageListOldImage);
-                }
-            }
-            for (Image imageListNewImage : imageListNew) {
-                if (!imageListOld.contains(imageListNewImage)) {
-                    Doctor oldIddoctorOfImageListNewImage = imageListNewImage.getIddoctor();
-                    imageListNewImage.setIddoctor(doctor);
-                    imageListNewImage = em.merge(imageListNewImage);
-                    if (oldIddoctorOfImageListNewImage != null && !oldIddoctorOfImageListNewImage.equals(doctor)) {
-                        oldIddoctorOfImageListNewImage.getImageList().remove(imageListNewImage);
-                        oldIddoctorOfImageListNewImage = em.merge(oldIddoctorOfImageListNewImage);
-                    }
-                }
             }
             for (File fileListNewFile : fileListNew) {
                 if (!fileListOld.contains(fileListNewFile)) {
@@ -218,11 +173,6 @@ public class DoctorJpaController implements Serializable {
             if (idperson != null) {
                 idperson.getDoctorList().remove(doctor);
                 idperson = em.merge(idperson);
-            }
-            List<Image> imageList = doctor.getImageList();
-            for (Image imageListImage : imageList) {
-                imageListImage.setIddoctor(null);
-                imageListImage = em.merge(imageListImage);
             }
             em.remove(doctor);
             em.getTransaction().commit();
