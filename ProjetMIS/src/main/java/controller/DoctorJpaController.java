@@ -5,24 +5,25 @@
  */
 package controller;
 
+import controller.exceptions.IllegalOrphanException;
+import controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import model.Person;
+import model.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import controller.exceptions.IllegalOrphanException;
-import controller.exceptions.NonexistentEntityException;
-import model.File;
 import model.Doctor;
 
 /**
  *
- * @author Elise
+ * @author Charlotte
  */
 public class DoctorJpaController implements Serializable {
 
@@ -36,36 +37,36 @@ public class DoctorJpaController implements Serializable {
     }
 
     public void create(Doctor doctor) {
-        if (doctor.getFileList() == null) {
-            doctor.setFileList(new ArrayList<File>());
+        if (doctor.getFileCollection() == null) {
+            doctor.setFileCollection(new ArrayList<File>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Person idperson = doctor.getIdperson();
-            if (idperson != null) {
-                idperson = em.getReference(idperson.getClass(), idperson.getIdperson());
-                doctor.setIdperson(idperson);
+            Person person = doctor.getPerson();
+            if (person != null) {
+                person = em.getReference(person.getClass(), person.getId());
+                doctor.setPerson(person);
             }
-            List<File> attachedFileList = new ArrayList<File>();
-            for (File fileListFileToAttach : doctor.getFileList()) {
-                fileListFileToAttach = em.getReference(fileListFileToAttach.getClass(), fileListFileToAttach.getIdfile());
-                attachedFileList.add(fileListFileToAttach);
+            Collection<File> attachedFileCollection = new ArrayList<File>();
+            for (File fileCollectionFileToAttach : doctor.getFileCollection()) {
+                fileCollectionFileToAttach = em.getReference(fileCollectionFileToAttach.getClass(), fileCollectionFileToAttach.getId());
+                attachedFileCollection.add(fileCollectionFileToAttach);
             }
-            doctor.setFileList(attachedFileList);
+            doctor.setFileCollection(attachedFileCollection);
             em.persist(doctor);
-            if (idperson != null) {
-                idperson.getDoctorList().add(doctor);
-                idperson = em.merge(idperson);
+            if (person != null) {
+                person.getDoctorCollection().add(doctor);
+                person = em.merge(person);
             }
-            for (File fileListFile : doctor.getFileList()) {
-                Doctor oldIddoctorOfFileListFile = fileListFile.getIddoctor();
-                fileListFile.setIddoctor(doctor);
-                fileListFile= em.merge(fileListFile);
-                if (oldIddoctorOfFileListFile != null) {
-                    oldIddoctorOfFileListFile.getFileList().remove(fileListFile);
-                    oldIddoctorOfFileListFile = em.merge(oldIddoctorOfFileListFile);
+            for (File fileCollectionFile : doctor.getFileCollection()) {
+                Doctor oldDoctorOfFileCollectionFile = fileCollectionFile.getDoctor();
+                fileCollectionFile.setDoctor(doctor);
+                fileCollectionFile = em.merge(fileCollectionFile);
+                if (oldDoctorOfFileCollectionFile != null) {
+                    oldDoctorOfFileCollectionFile.getFileCollection().remove(fileCollectionFile);
+                    oldDoctorOfFileCollectionFile = em.merge(oldDoctorOfFileCollectionFile);
                 }
             }
             em.getTransaction().commit();
@@ -81,51 +82,51 @@ public class DoctorJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Doctor persistentDoctor = em.find(Doctor.class, doctor.getIddoctor());
-            Person idpersonOld = persistentDoctor.getIdperson();
-            Person idpersonNew = doctor.getIdperson();
-            List<File> fileListOld = persistentDoctor.getFileList();
-            List<File> fileListNew = doctor.getFileList();
+            Doctor persistentDoctor = em.find(Doctor.class, doctor.getId());
+            Person personOld = persistentDoctor.getPerson();
+            Person personNew = doctor.getPerson();
+            Collection<File> fileCollectionOld = persistentDoctor.getFileCollection();
+            Collection<File> fileCollectionNew = doctor.getFileCollection();
             List<String> illegalOrphanMessages = null;
-            for (File fileListOldFile : fileListOld) {
-                if (!fileListNew.contains(fileListOldFile)) {
+            for (File fileCollectionOldFile : fileCollectionOld) {
+                if (!fileCollectionNew.contains(fileCollectionOldFile)) {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain File " + fileListOldFile + " since its iddoctor field is not nullable.");
+                    illegalOrphanMessages.add("You must retain File " + fileCollectionOldFile + " since its doctor field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            if (idpersonNew != null) {
-                idpersonNew = em.getReference(idpersonNew.getClass(), idpersonNew.getIdperson());
-                doctor.setIdperson(idpersonNew);
+            if (personNew != null) {
+                personNew = em.getReference(personNew.getClass(), personNew.getId());
+                doctor.setPerson(personNew);
             }
-            List<File> attachedFileListNew = new ArrayList<File>();
-            for (File fileListNewFileToAttach : fileListNew) {
-                fileListNewFileToAttach = em.getReference(fileListNewFileToAttach.getClass(), fileListNewFileToAttach.getIdfile());
-                attachedFileListNew.add(fileListNewFileToAttach);
+            Collection<File> attachedFileCollectionNew = new ArrayList<File>();
+            for (File fileCollectionNewFileToAttach : fileCollectionNew) {
+                fileCollectionNewFileToAttach = em.getReference(fileCollectionNewFileToAttach.getClass(), fileCollectionNewFileToAttach.getId());
+                attachedFileCollectionNew.add(fileCollectionNewFileToAttach);
             }
-            fileListNew = attachedFileListNew;
-            doctor.setFileList(fileListNew);
+            fileCollectionNew = attachedFileCollectionNew;
+            doctor.setFileCollection(fileCollectionNew);
             doctor = em.merge(doctor);
-            if (idpersonOld != null && !idpersonOld.equals(idpersonNew)) {
-                idpersonOld.getDoctorList().remove(doctor);
-                idpersonOld = em.merge(idpersonOld);
+            if (personOld != null && !personOld.equals(personNew)) {
+                personOld.getDoctorCollection().remove(doctor);
+                personOld = em.merge(personOld);
             }
-            if (idpersonNew != null && !idpersonNew.equals(idpersonOld)) {
-                idpersonNew.getDoctorList().add(doctor);
-                idpersonNew = em.merge(idpersonNew);
+            if (personNew != null && !personNew.equals(personOld)) {
+                personNew.getDoctorCollection().add(doctor);
+                personNew = em.merge(personNew);
             }
-            for (File fileListNewFile : fileListNew) {
-                if (!fileListOld.contains(fileListNewFile)) {
-                    Doctor oldIddoctorOfFileListNewFile= fileListNewFile.getIddoctor();
-                    fileListNewFile.setIddoctor(doctor);
-                    fileListNewFile = em.merge(fileListNewFile);
-                    if (oldIddoctorOfFileListNewFile != null && !oldIddoctorOfFileListNewFile.equals(doctor)) {
-                        oldIddoctorOfFileListNewFile.getFileList().remove(fileListNewFile);
-                        oldIddoctorOfFileListNewFile = em.merge(oldIddoctorOfFileListNewFile);
+            for (File fileCollectionNewFile : fileCollectionNew) {
+                if (!fileCollectionOld.contains(fileCollectionNewFile)) {
+                    Doctor oldDoctorOfFileCollectionNewFile = fileCollectionNewFile.getDoctor();
+                    fileCollectionNewFile.setDoctor(doctor);
+                    fileCollectionNewFile = em.merge(fileCollectionNewFile);
+                    if (oldDoctorOfFileCollectionNewFile != null && !oldDoctorOfFileCollectionNewFile.equals(doctor)) {
+                        oldDoctorOfFileCollectionNewFile.getFileCollection().remove(fileCollectionNewFile);
+                        oldDoctorOfFileCollectionNewFile = em.merge(oldDoctorOfFileCollectionNewFile);
                     }
                 }
             }
@@ -133,7 +134,7 @@ public class DoctorJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = doctor.getIddoctor();
+                Integer id = doctor.getId();
                 if (findDoctor(id) == null) {
                     throw new NonexistentEntityException("The doctor with id " + id + " no longer exists.");
                 }
@@ -154,25 +155,25 @@ public class DoctorJpaController implements Serializable {
             Doctor doctor;
             try {
                 doctor = em.getReference(Doctor.class, id);
-                doctor.getIddoctor();
+                doctor.getId();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The doctor with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
-            List<File> fileListOrphanCheck = doctor.getFileList();
-            for (File fileListOrphanCheckFile : fileListOrphanCheck) {
+            Collection<File> fileCollectionOrphanCheck = doctor.getFileCollection();
+            for (File fileCollectionOrphanCheckFile : fileCollectionOrphanCheck) {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This Doctor (" + doctor + ") cannot be destroyed since the File " + fileListOrphanCheckFile + " in its fileList field has a non-nullable iddoctor field.");
+                illegalOrphanMessages.add("This Doctor (" + doctor + ") cannot be destroyed since the File " + fileCollectionOrphanCheckFile + " in its fileCollection field has a non-nullable doctor field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            Person idperson = doctor.getIdperson();
-            if (idperson != null) {
-                idperson.getDoctorList().remove(doctor);
-                idperson = em.merge(idperson);
+            Person person = doctor.getPerson();
+            if (person != null) {
+                person.getDoctorCollection().remove(doctor);
+                person = em.merge(person);
             }
             em.remove(doctor);
             em.getTransaction().commit();

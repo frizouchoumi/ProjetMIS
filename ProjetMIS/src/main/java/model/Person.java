@@ -6,61 +6,151 @@
 package model;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Elise
+ * @author Charlotte
  */
-public class Person implements Serializable{
-    private int idperson;
-    private String FirstName;
-    private String LastName;
-    private Date DateOfBirth; /*Year/Month/Day*/
+@Entity
+@Table(name = "person")
+@XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "Person.findAll", query = "SELECT p FROM Person p"),
+    @NamedQuery(name = "Person.findById", query = "SELECT p FROM Person p WHERE p.id = :id"),
+    @NamedQuery(name = "Person.findByName", query = "SELECT p FROM Person p WHERE p.name = :name"),
+    @NamedQuery(name = "Person.findByFirstname", query = "SELECT p FROM Person p WHERE p.firstname = :firstname"),
+    @NamedQuery(name = "Person.findByDateOfBirth", query = "SELECT p FROM Person p WHERE p.dateOfBirth = :dateOfBirth")})
+public class Person implements Serializable {
     private List<Doctor> doctorList;
     private List<Patient> patientList;
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "ID")
+    private Integer id;
+    @Basic(optional = false)
+    @Column(name = "Name")
+    private String name;
+    @Basic(optional = false)
+    @Column(name = "Firstname")
+    private String firstname;
+    @Basic(optional = false)
+    @Column(name = "DateOfBirth")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateOfBirth;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "person")
+    private Collection<Doctor> doctorCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "person")
+    private Collection<Patient> patientCollection;
 
-    public Person(){
-        
-    }
-    public Person(int id, String FirstName, String LastName, Date DateOfBirth) {
-        this.idperson = idperson;
-        this.FirstName = FirstName;
-        this.LastName = LastName;
-        this.DateOfBirth = DateOfBirth;
-    }
-
-    public int getIdperson() {
-        return idperson;
-    }
-
-    public void setIdperson(int id) {
-        this.idperson= idperson;
-    }
-
-    public String getFirstName() {
-        return FirstName;
-    }
-
-    public void setFirstName(String FirstName) {
-        this.FirstName = FirstName;
+    public Person() {
     }
 
-    public String getLastName() {
-        return LastName;
+    public Person(Integer id) {
+        this.id = id;
     }
 
-    public void setLastName(String LastName) {
-        this.LastName = LastName;
+    public Person(Integer id, String name, String firstname, Date dateOfBirth) {
+        this.id = id;
+        this.name = name;
+        this.firstname = firstname;
+        this.dateOfBirth = dateOfBirth;
     }
-    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
     public Date getDateOfBirth() {
-        return DateOfBirth;
+        return dateOfBirth;
     }
 
-    public void setDateOfBirth(Date DateOfBirth) {
-        this.DateOfBirth = DateOfBirth;
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    @XmlTransient
+    public Collection<Doctor> getDoctorCollection() {
+        return doctorCollection;
+    }
+
+    public void setDoctorCollection(Collection<Doctor> doctorCollection) {
+        this.doctorCollection = doctorCollection;
+    }
+
+    @XmlTransient
+    public Collection<Patient> getPatientCollection() {
+        return patientCollection;
+    }
+
+    public void setPatientCollection(Collection<Patient> patientCollection) {
+        this.patientCollection = patientCollection;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof Person)) {
+            return false;
+        }
+        Person other = (Person) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "model.Person[ id=" + id + " ]";
+        
+
     }
     
     public List<Doctor> getDoctorList() {
@@ -78,8 +168,5 @@ public class Person implements Serializable{
     public void setPatientList(List<Patient> patientList) {
         this.patientList = patientList;
     }
-    
-    
-  
     
 }

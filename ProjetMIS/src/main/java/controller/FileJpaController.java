@@ -5,22 +5,26 @@
  */
 package controller;
 
+import controller.exceptions.IllegalOrphanException;
+import controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import model.Doctor;
 import model.Patient;
+import model.Doctor;
+import model.Filetags;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import controller.exceptions.NonexistentEntityException;
 import model.File;
 
 /**
  *
- * @author Elise
+ * @author Charlotte
  */
 public class FileJpaController implements Serializable {
 
@@ -34,28 +38,46 @@ public class FileJpaController implements Serializable {
     }
 
     public void create(File file) {
+        if (file.getFiletagsCollection() == null) {
+            file.setFiletagsCollection(new ArrayList<Filetags>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Doctor iddoctor = file.getIddoctor();
-            if (iddoctor != null) {
-                iddoctor = em.getReference(iddoctor.getClass(), iddoctor.getIddoctor());
-                file.setIddoctor(iddoctor);
+            Patient patient = file.getPatient();
+            if (patient != null) {
+                patient = em.getReference(patient.getClass(), patient.getId());
+                file.setPatient(patient);
             }
-            Patient idpatient = file.getIdpatient();
-            if (idpatient != null) {
-                idpatient = em.getReference(idpatient.getClass(), idpatient.getIdpatient());
-                file.setIdpatient(idpatient);
+            Doctor doctor = file.getDoctor();
+            if (doctor != null) {
+                doctor = em.getReference(doctor.getClass(), doctor.getId());
+                file.setDoctor(doctor);
             }
+            Collection<Filetags> attachedFiletagsCollection = new ArrayList<Filetags>();
+            for (Filetags filetagsCollectionFiletagsToAttach : file.getFiletagsCollection()) {
+                filetagsCollectionFiletagsToAttach = em.getReference(filetagsCollectionFiletagsToAttach.getClass(), filetagsCollectionFiletagsToAttach.getId());
+                attachedFiletagsCollection.add(filetagsCollectionFiletagsToAttach);
+            }
+            file.setFiletagsCollection(attachedFiletagsCollection);
             em.persist(file);
-            if (iddoctor != null) {
-                iddoctor.getFileList().add(file);
-                iddoctor = em.merge(iddoctor);
+            if (patient != null) {
+                patient.getFileCollection().add(file);
+                patient = em.merge(patient);
             }
-            if (idpatient != null) {
-                idpatient.getFileList().add(file);
-                idpatient = em.merge(idpatient);
+            if (doctor != null) {
+                doctor.getFileCollection().add(file);
+                doctor = em.merge(doctor);
+            }
+            for (Filetags filetagsCollectionFiletags : file.getFiletagsCollection()) {
+                File oldFileOfFiletagsCollectionFiletags = filetagsCollectionFiletags.getFile();
+                filetagsCollectionFiletags.setFile(file);
+                filetagsCollectionFiletags = em.merge(filetagsCollectionFiletags);
+                if (oldFileOfFiletagsCollectionFiletags != null) {
+                    oldFileOfFiletagsCollectionFiletags.getFiletagsCollection().remove(filetagsCollectionFiletags);
+                    oldFileOfFiletagsCollectionFiletags = em.merge(oldFileOfFiletagsCollectionFiletags);
+                }
             }
             em.getTransaction().commit();
         } finally {
@@ -65,48 +87,80 @@ public class FileJpaController implements Serializable {
         }
     }
 
-    public void edit(File file) throws NonexistentEntityException, Exception {
+    public void edit(File file) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            File persistentFile = em.find(File.class, file.getIdfile());
-            Doctor iddoctorOld = persistentFile.getIddoctor();
-            Doctor iddoctorNew = file.getIddoctor();
-            Patient idpatientOld = persistentFile.getIdpatient();
-            Patient idpatientNew = file.getIdpatient();
-            if (iddoctorNew != null) {
-                iddoctorNew = em.getReference(iddoctorNew.getClass(), iddoctorNew.getIddoctor());
-                file.setIddoctor(iddoctorNew);
+            File persistentFile = em.find(File.class, file.getId());
+            Patient patientOld = persistentFile.getPatient();
+            Patient patientNew = file.getPatient();
+            Doctor doctorOld = persistentFile.getDoctor();
+            Doctor doctorNew = file.getDoctor();
+            Collection<Filetags> filetagsCollectionOld = persistentFile.getFiletagsCollection();
+            Collection<Filetags> filetagsCollectionNew = file.getFiletagsCollection();
+            List<String> illegalOrphanMessages = null;
+            for (Filetags filetagsCollectionOldFiletags : filetagsCollectionOld) {
+                if (!filetagsCollectionNew.contains(filetagsCollectionOldFiletags)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Filetags " + filetagsCollectionOldFiletags + " since its file field is not nullable.");
+                }
             }
-            if (idpatientNew != null) {
-                idpatientNew = em.getReference(idpatientNew.getClass(), idpatientNew.getIdpatient());
-                file.setIdpatient(idpatientNew);
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
+            if (patientNew != null) {
+                patientNew = em.getReference(patientNew.getClass(), patientNew.getId());
+                file.setPatient(patientNew);
+            }
+            if (doctorNew != null) {
+                doctorNew = em.getReference(doctorNew.getClass(), doctorNew.getId());
+                file.setDoctor(doctorNew);
+            }
+            Collection<Filetags> attachedFiletagsCollectionNew = new ArrayList<Filetags>();
+            for (Filetags filetagsCollectionNewFiletagsToAttach : filetagsCollectionNew) {
+                filetagsCollectionNewFiletagsToAttach = em.getReference(filetagsCollectionNewFiletagsToAttach.getClass(), filetagsCollectionNewFiletagsToAttach.getId());
+                attachedFiletagsCollectionNew.add(filetagsCollectionNewFiletagsToAttach);
+            }
+            filetagsCollectionNew = attachedFiletagsCollectionNew;
+            file.setFiletagsCollection(filetagsCollectionNew);
             file = em.merge(file);
-            if (iddoctorOld != null && !iddoctorOld.equals(iddoctorNew)) {
-                iddoctorOld.getFileList().remove(file);
-                iddoctorOld = em.merge(iddoctorOld);
+            if (patientOld != null && !patientOld.equals(patientNew)) {
+                patientOld.getFileCollection().remove(file);
+                patientOld = em.merge(patientOld);
             }
-            if (iddoctorNew != null && !iddoctorNew.equals(iddoctorOld)) {
-                iddoctorNew.getFileList().add(file);
-                iddoctorNew = em.merge(iddoctorNew);
+            if (patientNew != null && !patientNew.equals(patientOld)) {
+                patientNew.getFileCollection().add(file);
+                patientNew = em.merge(patientNew);
             }
-            if (idpatientOld != null && !idpatientOld.equals(idpatientNew)) {
-                idpatientOld.getFileList().remove(file);
-                idpatientOld = em.merge(idpatientOld);
+            if (doctorOld != null && !doctorOld.equals(doctorNew)) {
+                doctorOld.getFileCollection().remove(file);
+                doctorOld = em.merge(doctorOld);
             }
-            if (idpatientNew != null && !idpatientNew.equals(idpatientOld)) {
-                idpatientNew.getFileList().add(file);
-                idpatientNew = em.merge(idpatientNew);
+            if (doctorNew != null && !doctorNew.equals(doctorOld)) {
+                doctorNew.getFileCollection().add(file);
+                doctorNew = em.merge(doctorNew);
+            }
+            for (Filetags filetagsCollectionNewFiletags : filetagsCollectionNew) {
+                if (!filetagsCollectionOld.contains(filetagsCollectionNewFiletags)) {
+                    File oldFileOfFiletagsCollectionNewFiletags = filetagsCollectionNewFiletags.getFile();
+                    filetagsCollectionNewFiletags.setFile(file);
+                    filetagsCollectionNewFiletags = em.merge(filetagsCollectionNewFiletags);
+                    if (oldFileOfFiletagsCollectionNewFiletags != null && !oldFileOfFiletagsCollectionNewFiletags.equals(file)) {
+                        oldFileOfFiletagsCollectionNewFiletags.getFiletagsCollection().remove(filetagsCollectionNewFiletags);
+                        oldFileOfFiletagsCollectionNewFiletags = em.merge(oldFileOfFiletagsCollectionNewFiletags);
+                    }
+                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = file.getIdfile();
+                Integer id = file.getId();
                 if (findFile(id) == null) {
-                    throw new NonexistentEntityException("The appointment with id " + id + " no longer exists.");
+                    throw new NonexistentEntityException("The file with id " + id + " no longer exists.");
                 }
             }
             throw ex;
@@ -117,7 +171,7 @@ public class FileJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -125,19 +179,30 @@ public class FileJpaController implements Serializable {
             File file;
             try {
                 file = em.getReference(File.class, id);
-                file.getIdfile();
+                file.getId();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The file with id " + id + " no longer exists.", enfe);
             }
-            Doctor iddoctor = file.getIddoctor();
-            if (iddoctor != null) {
-                iddoctor.getFileList().remove(file);
-                iddoctor = em.merge(iddoctor);
+            List<String> illegalOrphanMessages = null;
+            Collection<Filetags> filetagsCollectionOrphanCheck = file.getFiletagsCollection();
+            for (Filetags filetagsCollectionOrphanCheckFiletags : filetagsCollectionOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This File (" + file + ") cannot be destroyed since the Filetags " + filetagsCollectionOrphanCheckFiletags + " in its filetagsCollection field has a non-nullable file field.");
             }
-            Patient idpatient = file.getIdpatient();
-            if (idpatient != null) {
-                idpatient.getFileList().remove(file);
-                idpatient = em.merge(idpatient);
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            Patient patient = file.getPatient();
+            if (patient != null) {
+                patient.getFileCollection().remove(file);
+                patient = em.merge(patient);
+            }
+            Doctor doctor = file.getDoctor();
+            if (doctor != null) {
+                doctor.getFileCollection().remove(file);
+                doctor = em.merge(doctor);
             }
             em.remove(file);
             em.getTransaction().commit();

@@ -7,9 +7,8 @@ package controller.exceptions;
 
 /**
  *
- * @author Elise
+ * @author Charlotte
  */
-
 public class PreexistingEntityException extends Exception {
     public PreexistingEntityException(String message, Throwable cause) {
         super(message, cause);

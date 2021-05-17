@@ -15,8 +15,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -29,15 +27,13 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author Charlotte
  */
 @Entity
-@Table(name = "file")
+@Table(name = "tags")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "File.findAll", query = "SELECT f FROM File f"),
-    @NamedQuery(name = "File.findById", query = "SELECT f FROM File f WHERE f.id = :id"),
-    @NamedQuery(name = "File.findByPath", query = "SELECT f FROM File f WHERE f.path = :path"),
-    @NamedQuery(name = "File.findByType", query = "SELECT f FROM File f WHERE f.type = :type")})
-public class File implements Serializable {
-
+    @NamedQuery(name = "Tags.findAll", query = "SELECT t FROM Tags t"),
+    @NamedQuery(name = "Tags.findById", query = "SELECT t FROM Tags t WHERE t.id = :id"),
+    @NamedQuery(name = "Tags.findByTagName", query = "SELECT t FROM Tags t WHERE t.tagName = :tagName")})
+public class Tags implements Serializable {
     private List<Filetags> filetagsList;
     private static final long serialVersionUID = 1L;
     @Id
@@ -46,31 +42,21 @@ public class File implements Serializable {
     @Column(name = "ID")
     private Integer id;
     @Basic(optional = false)
-    @Column(name = "Path")
-    private String path;
-    @Basic(optional = false)
-    @Column(name = "Type")
-    private String type;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "file")
+    @Column(name = "TagName")
+    private String tagName;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tag")
     private Collection<Filetags> filetagsCollection;
-    @JoinColumn(name = "Patient", referencedColumnName = "ID")
-    @ManyToOne(optional = false)
-    private Patient patient;
-    @JoinColumn(name = "Doctor", referencedColumnName = "ID")
-    @ManyToOne(optional = false)
-    private Doctor doctor;
 
-    public File() {
+    public Tags() {
     }
 
-    public File(Integer id) {
+    public Tags(Integer id) {
         this.id = id;
     }
 
-    public File(Integer id, String path, String type) {
+    public Tags(Integer id, String tagName) {
         this.id = id;
-        this.path = path;
-        this.type = type;
+        this.tagName = tagName;
     }
 
     public Integer getId() {
@@ -81,20 +67,12 @@ public class File implements Serializable {
         this.id = id;
     }
 
-    public String getPath() {
-        return path;
+    public String getTagName() {
+        return tagName;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
     }
 
     @XmlTransient
@@ -104,22 +82,6 @@ public class File implements Serializable {
 
     public void setFiletagsCollection(Collection<Filetags> filetagsCollection) {
         this.filetagsCollection = filetagsCollection;
-    }
-
-    public Patient getPatient() {
-        return patient;
-    }
-
-    public void setPatient(Patient patient) {
-        this.patient = patient;
-    }
-
-    public Doctor getDoctor() {
-        return doctor;
-    }
-
-    public void setDoctor(Doctor doctor) {
-        this.doctor = doctor;
     }
 
     @Override
@@ -132,10 +94,10 @@ public class File implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof File)) {
+        if (!(object instanceof Tags)) {
             return false;
         }
-        File other = (File) object;
+        Tags other = (Tags) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -144,14 +106,14 @@ public class File implements Serializable {
 
     @Override
     public String toString() {
-        return "model.File[ id=" + id + " ]";
+        return "model.Tags[ id=" + id + " ]";
     }
     
     public List<Filetags> getFileTagsList() {
         return filetagsList;
     }
 
-    public void setFiletagsList(List<Filetags> filetagsList) {
+    public void setFileTagsList(List<Filetags> filetagsList) {
         this.filetagsList = filetagsList;
     }
     

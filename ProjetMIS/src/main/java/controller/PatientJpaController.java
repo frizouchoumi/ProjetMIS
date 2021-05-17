@@ -5,24 +5,25 @@
  */
 package controller;
 
+import controller.exceptions.IllegalOrphanException;
+import controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import model.Person;
+import model.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import controller.exceptions.IllegalOrphanException;
-import controller.exceptions.NonexistentEntityException;
-import model.File;
 import model.Patient;
 
 /**
  *
- * @author Elise
+ * @author Charlotte
  */
 public class PatientJpaController implements Serializable {
 
@@ -36,36 +37,36 @@ public class PatientJpaController implements Serializable {
     }
 
     public void create(Patient patient) {
-        if (patient.getFileList() == null) {
-            patient.setFileList(new ArrayList<File>());
+        if (patient.getFileCollection() == null) {
+            patient.setFileCollection(new ArrayList<File>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Person idperson = patient.getIdperson();
-            if (idperson != null) {
-                idperson = em.getReference(idperson.getClass(), idperson.getIdperson());
-                patient.setIdperson(idperson);
+            Person person = patient.getPerson();
+            if (person != null) {
+                person = em.getReference(person.getClass(), person.getId());
+                patient.setPerson(person);
             }
-            List<File> attachedFileList = new ArrayList<File>();
-            for (File fileListFileToAttach : patient.getFileList()) {
-                fileListFileToAttach = em.getReference(fileListFileToAttach.getClass(), fileListFileToAttach.getIdfile());
-                attachedFileList.add(fileListFileToAttach);
+            Collection<File> attachedFileCollection = new ArrayList<File>();
+            for (File fileCollectionFileToAttach : patient.getFileCollection()) {
+                fileCollectionFileToAttach = em.getReference(fileCollectionFileToAttach.getClass(), fileCollectionFileToAttach.getId());
+                attachedFileCollection.add(fileCollectionFileToAttach);
             }
-            patient.setFileList(attachedFileList);
+            patient.setFileCollection(attachedFileCollection);
             em.persist(patient);
-            if (idperson != null) {
-                idperson.getPatientList().add(patient);
-                idperson = em.merge(idperson);
+            if (person != null) {
+                person.getPatientCollection().add(patient);
+                person = em.merge(person);
             }
-            for (File fileListFile : patient.getFileList()) {
-                Patient oldIdpatientOfFileListFile = fileListFile.getIdpatient();
-                fileListFile.setIdpatient(patient);
-                fileListFile = em.merge(fileListFile);
-                if (oldIdpatientOfFileListFile != null) {
-                    oldIdpatientOfFileListFile.getFileList().remove(fileListFile);
-                    oldIdpatientOfFileListFile = em.merge(oldIdpatientOfFileListFile);
+            for (File fileCollectionFile : patient.getFileCollection()) {
+                Patient oldPatientOfFileCollectionFile = fileCollectionFile.getPatient();
+                fileCollectionFile.setPatient(patient);
+                fileCollectionFile = em.merge(fileCollectionFile);
+                if (oldPatientOfFileCollectionFile != null) {
+                    oldPatientOfFileCollectionFile.getFileCollection().remove(fileCollectionFile);
+                    oldPatientOfFileCollectionFile = em.merge(oldPatientOfFileCollectionFile);
                 }
             }
             em.getTransaction().commit();
@@ -81,51 +82,51 @@ public class PatientJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Patient persistentPatient = em.find(Patient.class, patient.getIdpatient());
-            Person idpersonOld = persistentPatient.getIdperson();
-            Person idpersonNew = patient.getIdperson();
-            List<File> fileListOld = persistentPatient.getFileList();
-            List<File> fileListNew = patient.getFileList();
+            Patient persistentPatient = em.find(Patient.class, patient.getId());
+            Person personOld = persistentPatient.getPerson();
+            Person personNew = patient.getPerson();
+            Collection<File> fileCollectionOld = persistentPatient.getFileCollection();
+            Collection<File> fileCollectionNew = patient.getFileCollection();
             List<String> illegalOrphanMessages = null;
-            for (File fileListOldFile : fileListOld) {
-                if (!fileListNew.contains(fileListOldFile)) {
+            for (File fileCollectionOldFile : fileCollectionOld) {
+                if (!fileCollectionNew.contains(fileCollectionOldFile)) {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain File " + fileListOldFile + " since its idpatient field is not nullable.");
+                    illegalOrphanMessages.add("You must retain File " + fileCollectionOldFile + " since its patient field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            if (idpersonNew != null) {
-                idpersonNew = em.getReference(idpersonNew.getClass(), idpersonNew.getIdperson());
-                patient.setIdperson(idpersonNew);
+            if (personNew != null) {
+                personNew = em.getReference(personNew.getClass(), personNew.getId());
+                patient.setPerson(personNew);
             }
-            List<File> attachedFileListNew = new ArrayList<File>();
-            for (File fileListNewFileToAttach : fileListNew) {
-                fileListNewFileToAttach = em.getReference(fileListNewFileToAttach.getClass(), fileListNewFileToAttach.getIdfile());
-                attachedFileListNew.add(fileListNewFileToAttach);
+            Collection<File> attachedFileCollectionNew = new ArrayList<File>();
+            for (File fileCollectionNewFileToAttach : fileCollectionNew) {
+                fileCollectionNewFileToAttach = em.getReference(fileCollectionNewFileToAttach.getClass(), fileCollectionNewFileToAttach.getId());
+                attachedFileCollectionNew.add(fileCollectionNewFileToAttach);
             }
-            fileListNew = attachedFileListNew;
-            patient.setFileList(fileListNew);
+            fileCollectionNew = attachedFileCollectionNew;
+            patient.setFileCollection(fileCollectionNew);
             patient = em.merge(patient);
-            if (idpersonOld != null && !idpersonOld.equals(idpersonNew)) {
-                idpersonOld.getPatientList().remove(patient);
-                idpersonOld = em.merge(idpersonOld);
+            if (personOld != null && !personOld.equals(personNew)) {
+                personOld.getPatientCollection().remove(patient);
+                personOld = em.merge(personOld);
             }
-            if (idpersonNew != null && !idpersonNew.equals(idpersonOld)) {
-                idpersonNew.getPatientList().add(patient);
-                idpersonNew = em.merge(idpersonNew);
+            if (personNew != null && !personNew.equals(personOld)) {
+                personNew.getPatientCollection().add(patient);
+                personNew = em.merge(personNew);
             }
-            for (File fileListNewFile : fileListNew) {
-                if (!fileListOld.contains(fileListNewFile)) {
-                    Patient oldIdpatientOfFileListNewFile = fileListNewFile.getIdpatient();
-                    fileListNewFile.setIdpatient(patient);
-                    fileListNewFile = em.merge(fileListNewFile);
-                    if (oldIdpatientOfFileListNewFile != null && !oldIdpatientOfFileListNewFile.equals(patient)) {
-                        oldIdpatientOfFileListNewFile.getFileList().remove(fileListNewFile);
-                        oldIdpatientOfFileListNewFile = em.merge(oldIdpatientOfFileListNewFile);
+            for (File fileCollectionNewFile : fileCollectionNew) {
+                if (!fileCollectionOld.contains(fileCollectionNewFile)) {
+                    Patient oldPatientOfFileCollectionNewFile = fileCollectionNewFile.getPatient();
+                    fileCollectionNewFile.setPatient(patient);
+                    fileCollectionNewFile = em.merge(fileCollectionNewFile);
+                    if (oldPatientOfFileCollectionNewFile != null && !oldPatientOfFileCollectionNewFile.equals(patient)) {
+                        oldPatientOfFileCollectionNewFile.getFileCollection().remove(fileCollectionNewFile);
+                        oldPatientOfFileCollectionNewFile = em.merge(oldPatientOfFileCollectionNewFile);
                     }
                 }
             }
@@ -133,7 +134,7 @@ public class PatientJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = patient.getIdpatient();
+                Integer id = patient.getId();
                 if (findPatient(id) == null) {
                     throw new NonexistentEntityException("The patient with id " + id + " no longer exists.");
                 }
@@ -154,25 +155,25 @@ public class PatientJpaController implements Serializable {
             Patient patient;
             try {
                 patient = em.getReference(Patient.class, id);
-                patient.getIdpatient();
+                patient.getId();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The patient with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
-            List<File> fileListOrphanCheck = patient.getFileList();
-            for (File fileListOrphanCheckFile : fileListOrphanCheck) {
+            Collection<File> fileCollectionOrphanCheck = patient.getFileCollection();
+            for (File fileCollectionOrphanCheckFile : fileCollectionOrphanCheck) {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This Patient (" + patient + ") cannot be destroyed since the File " + fileListOrphanCheckFile + " in its fileList field has a non-nullable idpatient field.");
+                illegalOrphanMessages.add("This Patient (" + patient + ") cannot be destroyed since the File " + fileCollectionOrphanCheckFile + " in its fileCollection field has a non-nullable patient field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            Person idperson = patient.getIdperson();
-            if (idperson != null) {
-                idperson.getPatientList().remove(patient);
-                idperson = em.merge(idperson);
+            Person person = patient.getPerson();
+            if (person != null) {
+                person.getPatientCollection().remove(patient);
+                person = em.merge(person);
             }
             em.remove(patient);
             em.getTransaction().commit();
@@ -228,18 +229,5 @@ public class PatientJpaController implements Serializable {
             em.close();
         }
     }
-    
-    /*public List<Patient> findPatientsByFamilyName(String familyName){
-        EntityManager em = getEntityManager();
-        List<Person> persons = em.createNamedQuery("Person.findByFamilyname").setParameter("familyname", familyName).getResultList();
-        List<Patient> patients = new ArrayList();
-        
-        for( Person p : persons ){
-            if( p.getPatientList().size() > 0 )
-                patients.add( p.getPatientList().get(0) );
-        } 
-        
-        return patients;
-    }*/
     
 }

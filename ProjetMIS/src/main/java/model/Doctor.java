@@ -6,29 +6,72 @@
 package model;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Elise
+ * @author Charlotte
  */
-public class Doctor implements Serializable{
-    private int iddoctor;
-    private int inami;
-    private Person idperson;
+@Entity
+@Table(name = "doctor")
+@XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "Doctor.findAll", query = "SELECT d FROM Doctor d"),
+    @NamedQuery(name = "Doctor.findById", query = "SELECT d FROM Doctor d WHERE d.id = :id"),
+    @NamedQuery(name = "Doctor.findByInami", query = "SELECT d FROM Doctor d WHERE d.inami = :inami")})
+public class Doctor implements Serializable {
+    
     private List<File> fileList;
 
-    public Doctor(int iddoctor, int inami) {
-        this.iddoctor = iddoctor;
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "ID")
+    private Integer id;
+    @Basic(optional = false)
+    @Column(name = "Inami")
+    private int inami;
+    @JoinColumn(name = "Person", referencedColumnName = "ID")
+    @ManyToOne(optional = false)
+    private Person person;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "doctor")
+    private Collection<File> fileCollection;
+
+    public Doctor() {
+    }
+
+    public Doctor(Integer id) {
+        this.id = id;
+    }
+
+    public Doctor(Integer id, int inami) {
+        this.id = id;
         this.inami = inami;
     }
 
-    public int getIddoctor() {
-        return iddoctor;
+    public Integer getId() {
+        return id;
     }
 
-    public void setIddoctor(int iddoctor) {
-        this.iddoctor = iddoctor;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public int getInami() {
@@ -39,14 +82,48 @@ public class Doctor implements Serializable{
         this.inami = inami;
     }
 
-    public Person getIdperson() {
-        return idperson;
+    public Person getPerson() {
+        return person;
     }
 
-    public void setIdperson(Person idperson) {
-        this.idperson = idperson;
+    public void setPerson(Person person) {
+        this.person = person;
     }
 
+    @XmlTransient
+    public Collection<File> getFileCollection() {
+        return fileCollection;
+    }
+
+    public void setFileCollection(Collection<File> fileCollection) {
+        this.fileCollection = fileCollection;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof Doctor)) {
+            return false;
+        }
+        Doctor other = (Doctor) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "model.Doctor[ id=" + id + " ]";
+    }
+    
     public List<File> getFileList() {
         return fileList;
     }
@@ -54,6 +131,5 @@ public class Doctor implements Serializable{
     public void setFileList(List<File> fileList) {
         this.fileList = fileList;
     }
-    
     
 }
