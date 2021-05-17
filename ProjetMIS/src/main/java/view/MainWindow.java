@@ -6,10 +6,16 @@
 package view;
 
 
+import controller.DoctorJpaController;
+import controller.PatientJpaController;
+import controller.PersonJpaController;
+import controller.exceptions.NonexistentEntityException;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import static java.lang.Integer.parseInt;
+import static java.lang.String.valueOf;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +29,17 @@ import model.Patient;
  * @author Charlotte
  */
 public class MainWindow extends javax.swing.JFrame {
+    
+    private final EntityManagerFactory emfac = Persistence.createEntityManagerFactory("misProjet");
+    private final DoctorJpaController doctorCtrl = new DoctorJpaController(emfac);
+    private final PersonJpaController personCtrl = new PersonJpaController(emfac);
+    private final PatientJpaController patientCtrl = new PatientJpaController(emfac);
+    
+    Doctor doctor = null;
+    Patient patient = null;
+    
+    
+    
 
     /**
      * Creates new form MainWindow
@@ -42,19 +59,14 @@ public class MainWindow extends javax.swing.JFrame {
 
         Patient = new javax.swing.JButton();
         Doctor = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        name = new javax.swing.JTextField();
-        firstname = new javax.swing.JTextField();
-        dateofbirth = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         SocialSec = new javax.swing.JTextField();
         Inami = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
+        addPersonPanel1 = new view.addPersonPanel();
+        addPersonPanel2 = new view.addPersonPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -73,65 +85,6 @@ public class MainWindow extends javax.swing.JFrame {
                 DoctorActionPerformed(evt);
             }
         });
-
-        jLabel1.setText("Name : ");
-
-        jLabel2.setText("First name : ");
-
-        jLabel3.setText("Date of birth : ");
-
-        name.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nameActionPerformed(evt);
-            }
-        });
-
-        firstname.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                firstnameActionPerformed(evt);
-            }
-        });
-
-        dateofbirth.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                dateofbirthActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(name)
-                    .addComponent(firstname)
-                    .addComponent(dateofbirth, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))
-                .addGap(18, 18, 18))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(firstname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(dateofbirth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
 
         jLabel7.setText("Doctor");
 
@@ -164,48 +117,51 @@ public class MainWindow extends javax.swing.JFrame {
                 .addComponent(Doctor)
                 .addGap(68, 68, 68))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(149, 149, 149)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(87, 87, 87))
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(addPersonPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                .addComponent(addPersonPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 378, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 16, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(17, 17, 17)
                 .addComponent(jLabel8)
-                .addGap(64, 64, 64)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(SocialSec, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 103, Short.MAX_VALUE)
+                .addGap(126, 126, 126)
                 .addComponent(jLabel10)
-                .addGap(45, 45, 45)
+                .addGap(53, 53, 53)
                 .addComponent(Inami, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(86, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9))
                 .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(addPersonPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(addPersonPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addGap(44, 44, 44)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(119, 119, 119)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(SocialSec, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel10)
+                            .addComponent(Inami, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(225, 225, 225)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(Patient, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(Doctor, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(157, 157, 157)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel8)
-                            .addComponent(SocialSec, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(Inami, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel10))))
+                    .addComponent(jLabel8))
                 .addGap(39, 39, 39))
         );
 
@@ -218,9 +174,48 @@ public class MainWindow extends javax.swing.JFrame {
         Doctor.setEnabled(false);
         
     }
+    
+    
+    public void updatePatient(){
+        if( patient == null ){
+            patient = new Patient();
+        }
+        
+        patient.setPerson(addPersonPanel1.getPerson());
+        int socialsec = parseInt(SocialSec.getText());
+        patient.setSocialSec(socialsec);
+
+        
+    }
+    
+    public Doctor getDoctor() {
+        updateDoctor();
+        
+        return doctor;
+    }
+
+    public void setDoctor(Doctor doctor) {
+        this.doctor = doctor;
+        
+        addPersonPanel2.setPerson(this.doctor.getPerson());
+        String inami = valueOf(this.doctor.getInami());
+        Inami.setText(inami);
+        
+    }
+    
         
         
+    public void updateDoctor(){
+        if( doctor == null ){
+            doctor = new Doctor();
+        }
         
+        doctor.setPerson(addPersonPanel2.getPerson());
+        int inami = parseInt(Inami.getText());
+        doctor.setInami(inami);
+        
+    }
+    
     private void PatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PatientActionPerformed
         // TODO add your handling code here:
         //mettre ici code pour arriver sur la fenêtre "MainWindowPatient"
@@ -233,11 +228,36 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         
-    }//GEN-LAST:event_PatientActionPerformed
+        updatePatient();
 
+        // Create person if necessary:
+        if( patient.getPerson().getId() == null ){
+            personCtrl.create(patient.getPerson());           
+        }
+        // Create patient if necessary
+        if( patient.getId() == null ){
+            patientCtrl.create(patient);
+        }
+        
+        // Save changes
+        try {
+            personCtrl.edit(patient.getPerson());
+            patientCtrl.edit(patient);
+        } catch (NonexistentEntityException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        this.dispose();   
+        
+    }//GEN-LAST:event_PatientActionPerformed
+    
     private void DoctorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DoctorActionPerformed
         // TODO add your handling code here:
         //mettre ici code pour arriver sur la fenêtre "MainWindowDoctor"
+        
+        
         MainWindowDoctor doctorPopup = new MainWindowDoctor();
         doctorPopup.setVisible(true);
         
@@ -247,19 +267,30 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         
+        updateDoctor();
+        
+        // Create person if necessary:
+        if( doctor.getPerson().getId() == null ){
+            personCtrl.create(doctor.getPerson());
+        }
+        // Create doctor if necessary:
+        if( doctor.getId() == null ){
+            doctorCtrl.create(doctor);
+        }
+        
+        // Save changes
+        try{
+            personCtrl.edit(doctor.getPerson());
+            doctorCtrl.edit(doctor);
+        } catch (NonexistentEntityException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        this.dispose();
+        
     }//GEN-LAST:event_DoctorActionPerformed
-
-    private void nameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_nameActionPerformed
-
-    private void firstnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_firstnameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_firstnameActionPerformed
-
-    private void dateofbirthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dateofbirthActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_dateofbirthActionPerformed
 
     private void SocialSecActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SocialSecActionPerformed
         // TODO add your handling code here:
@@ -316,16 +347,11 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JTextField Inami;
     private javax.swing.JButton Patient;
     private javax.swing.JTextField SocialSec;
-    private javax.swing.JTextField dateofbirth;
-    private javax.swing.JTextField firstname;
-    private javax.swing.JLabel jLabel1;
+    private view.addPersonPanel addPersonPanel1;
+    private view.addPersonPanel addPersonPanel2;
     private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField name;
     // End of variables declaration//GEN-END:variables
 }
