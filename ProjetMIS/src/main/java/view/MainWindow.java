@@ -175,6 +175,14 @@ public class MainWindow extends javax.swing.JFrame {
         
     }
     
+    /*private void refreshDoctorList(){
+        List doctors = doctorCtrl.findDoctorEntities();
+        EntityListModel<Doctor> model = new EntityListModel(doctors);
+        
+        itemList.setModel(model);
+    }*/
+    
+    
     
     public void updatePatient(){
         if( patient == null ){
@@ -184,8 +192,6 @@ public class MainWindow extends javax.swing.JFrame {
         patient.setPerson(addPersonPanel1.getPerson());
         int socialsec = parseInt(SocialSec.getText());
         patient.setSocialSec(socialsec);
-
-        
     }
     
     public Doctor getDoctor() {
@@ -216,6 +222,8 @@ public class MainWindow extends javax.swing.JFrame {
         
     }
     
+    
+    
     private void PatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PatientActionPerformed
         // TODO add your handling code here:
         //mettre ici code pour arriver sur la fenêtre "MainWindowPatient"
@@ -225,6 +233,7 @@ public class MainWindow extends javax.swing.JFrame {
         patientPopup.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent evt){
+                
             }
         });
         
