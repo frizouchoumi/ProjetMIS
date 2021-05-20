@@ -7,7 +7,6 @@ package model;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -38,7 +37,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "File.findByType", query = "SELECT f FROM File f WHERE f.type = :type")})
 public class File implements Serializable {
 
-    private List<Filetags> filetagsList;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -145,14 +143,6 @@ public class File implements Serializable {
     @Override
     public String toString() {
         return "model.File[ id=" + id + " ]";
-    }
-    
-    public List<Filetags> getFileTagsList() {
-        return filetagsList;
-    }
-
-    public void setFiletagsList(List<Filetags> filetagsList) {
-        this.filetagsList = filetagsList;
     }
     
 }

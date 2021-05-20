@@ -7,8 +7,11 @@ package view;
 
 
 import controller.DoctorJpaController;
+import controller.DoctorgJpaController;
 import controller.PatientJpaController;
+import controller.PatientgJpaController;
 import controller.PersonJpaController;
+import controller.PersongJpaController;
 import controller.exceptions.NonexistentEntityException;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -22,21 +25,23 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import model.Doctor;
+import model.Doctorg;
 import model.Patient;
-
+import model.Patientg;
+import model.Persong;
 /**
  *
  * @author Charlotte
  */
 public class MainWindow extends javax.swing.JFrame {
     
-    private final EntityManagerFactory emfac = Persistence.createEntityManagerFactory("misProjet");
-    private final DoctorJpaController doctorCtrl = new DoctorJpaController(emfac);
-    private final PersonJpaController personCtrl = new PersonJpaController(emfac);
-    private final PatientJpaController patientCtrl = new PatientJpaController(emfac);
+    private final EntityManagerFactory emfac = Persistence.createEntityManagerFactory("databaseGlobale");
+    private final DoctorgJpaController doctorgCtrl = new DoctorgJpaController(emfac);
+    private final PersongJpaController persongCtrl = new PersongJpaController(emfac);
+    private final PatientgJpaController patientgCtrl = new PatientgJpaController(emfac);
     
-    Doctor doctor = null;
-    Patient patient = null;
+    Doctorg doctor = null;
+    Patientg patient = null;
     
     
     
@@ -133,11 +138,11 @@ public class MainWindow extends javax.swing.JFrame {
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(SocialSec, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(126, 126, 126)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel10)
-                .addGap(53, 53, 53)
+                .addGap(37, 37, 37)
                 .addComponent(Inami, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(89, 89, 89))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -186,7 +191,7 @@ public class MainWindow extends javax.swing.JFrame {
     
     public void updatePatient(){
         if( patient == null ){
-            patient = new Patient();
+            patient = new Patientg();
         }
         
         patient.setPerson(addPersonPanel1.getPerson());
@@ -194,13 +199,13 @@ public class MainWindow extends javax.swing.JFrame {
         patient.setSocialSec(socialsec);
     }
     
-    public Doctor getDoctor() {
+    public Doctorg getDoctor() {
         updateDoctor();
         
         return doctor;
     }
 
-    public void setDoctor(Doctor doctor) {
+    public void setDoctor(Doctorg doctor) {
         this.doctor = doctor;
         
         addPersonPanel2.setPerson(this.doctor.getPerson());
@@ -213,7 +218,7 @@ public class MainWindow extends javax.swing.JFrame {
         
     public void updateDoctor(){
         if( doctor == null ){
-            doctor = new Doctor();
+            doctor = new Doctorg();
         }
         
         doctor.setPerson(addPersonPanel2.getPerson());
@@ -240,25 +245,25 @@ public class MainWindow extends javax.swing.JFrame {
         updatePatient();
 
         // Create person if necessary:
-        if( patient.getPerson().getId() == null ){
-            personCtrl.create(patient.getPerson());           
+        if( patient.getPerson().getIDperson() == null ){
+            persongCtrl.create(patient.getPerson());           
         }
         // Create patient if necessary
-        if( patient.getId() == null ){
-            patientCtrl.create(patient);
+        if( patient.getIDpatient() == null ){
+            patientgCtrl.create(patient);
         }
         
         // Save changes
         try {
-            personCtrl.edit(patient.getPerson());
-            patientCtrl.edit(patient);
+            persongCtrl.edit(patient.getPerson());
+            patientgCtrl.edit(patient);
         } catch (NonexistentEntityException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        this.dispose();   
+        //this.dispose();   
         
     }//GEN-LAST:event_PatientActionPerformed
     
@@ -279,18 +284,18 @@ public class MainWindow extends javax.swing.JFrame {
         updateDoctor();
         
         // Create person if necessary:
-        if( doctor.getPerson().getId() == null ){
-            personCtrl.create(doctor.getPerson());
+        if( doctor.getPerson().getIDperson() == null ){
+            persongCtrl.create(doctor.getPerson());
         }
         // Create doctor if necessary:
-        if( doctor.getId() == null ){
-            doctorCtrl.create(doctor);
+        if( doctor.getIDdoctor() == null ){
+            doctorgCtrl.create(doctor);
         }
         
         // Save changes
         try{
-            personCtrl.edit(doctor.getPerson());
-            doctorCtrl.edit(doctor);
+            persongCtrl.edit(doctor.getPerson());
+            doctorgCtrl.edit(doctor);
         } catch (NonexistentEntityException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {

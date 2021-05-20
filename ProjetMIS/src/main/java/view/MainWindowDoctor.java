@@ -5,22 +5,52 @@
  */
 package view;
 
+import controller.DoctorJpaController;
+import controller.FileJpaController;
+import controller.PatientJpaController;
+import controller.PersonJpaController;
+import controller.exceptions.NonexistentEntityException;
 import java.awt.Image;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import model.Doctor;
+import model.File;
+import model.Patient;
+import model.Person;
+
+
+
 
 /**
  *
  * @author Charlotte
  */
 public class MainWindowDoctor extends javax.swing.JFrame {
-
+    private final EntityManagerFactory emfacperso = Persistence.createEntityManagerFactory("misProjet");
+    private final PatientJpaController patientCtrl = new PatientJpaController(emfacperso);
+    private final FileJpaController fileCtrl = new FileJpaController(emfacperso);
+    private final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+    
+    model.File file = null; 
+    java.io.File selectedFile;
+    
+    
+    
     /**
      * Creates new form MainWindowDoctor
      */
     public MainWindowDoctor() {
         initComponents();
+        refreshContactList();
     }
 
     /**
@@ -33,19 +63,25 @@ public class MainWindowDoctor extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        TypeComboBox = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        pathTextField = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        patientList = new javax.swing.JList<>();
+        imageLabel = new javax.swing.JLabel();
+        selectFileButton = new javax.swing.JButton();
+        saveFileButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setText("Add a file");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "CT-scan", "Diagnostic" }));
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+        TypeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "CT-scan", "Diagnostic" }));
+        TypeComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
+                TypeComboBoxActionPerformed(evt);
             }
         });
 
@@ -53,9 +89,35 @@ public class MainWindowDoctor extends javax.swing.JFrame {
 
         jLabel3.setText("type :");
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        pathTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                pathTextFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel4.setText("Patient :");
+
+        patientList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                patientListMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(patientList);
+
+        imageLabel.setBackground(new java.awt.Color(0, 0, 0));
+        imageLabel.setForeground(new java.awt.Color(255, 255, 255));
+
+        selectFileButton.setText("Select file");
+        selectFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectFileButtonActionPerformed(evt);
+            }
+        });
+
+        saveFileButton.setText("Save to database");
+        saveFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveFileButtonActionPerformed(evt);
             }
         });
 
@@ -66,46 +128,151 @@ public class MainWindowDoctor extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTextField1))
+                    .addComponent(jLabel1)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
+                            .addComponent(jLabel4)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addGap(18, 18, 18)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 246, Short.MAX_VALUE)))
-                .addContainerGap())
+                                .addGap(5, 5, 5)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel3))))
+                        .addGap(26, 26, 26)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(TypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 366, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(pathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 486, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(selectFileButton))
+                            .addComponent(saveFileButton))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(imageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(49, 49, 49)
+                .addGap(19, 19, 19)
                 .addComponent(jLabel1)
-                .addGap(20, 20, 20)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3))
-                .addGap(26, 26, 26)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGap(33, 33, 33)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(TypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(87, 87, 87)))
+                .addGap(25, 25, 25)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(100, Short.MAX_VALUE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(pathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(selectFileButton)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(imageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(49, 49, 49)
+                        .addComponent(saveFileButton)))
+                .addGap(90, 90, 90))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+    private void refreshContactList(){
+        List patients = patientCtrl.findPatientEntities();
+        
+        EntityListModel<Patient> patient = new EntityListModel(patients);
+        
+        patientList.setModel(patient);
+    }
+    
+    
+    private void TypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TypeComboBoxActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
+    }//GEN-LAST:event_TypeComboBoxActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void pathTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pathTextFieldActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_pathTextFieldActionPerformed
+    
+    public void updateFile() throws ParseException{
+        
+        if( file == null ){
+                file = new File();
+        }
+        
+        file.setType((String) TypeComboBox.getSelectedItem());
+
+        Person person = new Person(4,"derou", "cha" , fmt.parse("1999-09-15"));
+        Doctor doctor = new Doctor(4,123456);
+        doctor.setPerson(person);
+        file.setDoctor(doctor);
+        
+        
+    }
+    
+       
+    
+    private void patientListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_patientListMouseClicked
+        // TODO add your handling code here:
+        if (evt.getClickCount() == 2 && evt.getButton() == MouseEvent.BUTTON1 && patientList.getSelectedIndex() >= 0) {
+            EntityListModel patient = (EntityListModel) patientList.getModel();
+           
+            Patient selected = (Patient) patient.getList().get(patientList.getSelectedIndex());
+            if( file == null ){
+                file = new File();
+            }
+            
+            file.setPatient(selected);
+            System.out.println("selected "+ selected);
+        }
+    }//GEN-LAST:event_patientListMouseClicked
+
+    private void saveFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveFileButtonActionPerformed
+        try {
+            // TODO add your handling code here:
+            updateFile();
+            System.out.println("bouton");
+        } catch (ParseException ex) {
+            Logger.getLogger(MainWindowDoctor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        // Create doctor if necessary:
+        if( file.getId() == null ){
+            fileCtrl.create(file);
+        }
+        
+        // Save changes
+        try{
+            
+            fileCtrl.edit(file);
+        } catch (NonexistentEntityException ex) {
+            Logger.getLogger(MainWindowDoctor.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(MainWindowDoctor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        
+    }//GEN-LAST:event_saveFileButtonActionPerformed
+
+    private void selectFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFileButtonActionPerformed
+        // TODO add your handling code here:
+        
+        selectedFile = SelectFilePopup.getFile();
+        pathTextField.setText(selectedFile.getAbsolutePath());
+        file.setPath(selectedFile.getAbsolutePath());
+     
+    }//GEN-LAST:event_selectFileButtonActionPerformed
 
     private void refreshImageList(){
         //List images = imageCtrl.findImageEntities();
@@ -114,13 +281,7 @@ public class MainWindowDoctor extends javax.swing.JFrame {
         //itemsList.setModel(model);
     }
     
-    private void disableButtons(){
-        /*
-        editImageButton.setEnabled(false);
-        
-        deletePatientButton.setEnabled(false);
-        deleteImageButton.setEnabled(false);*/
-    }
+   
     
    
     
@@ -160,10 +321,16 @@ public class MainWindowDoctor extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JComboBox<String> TypeComboBox;
+    private javax.swing.JLabel imageLabel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField pathTextField;
+    private javax.swing.JList<String> patientList;
+    private javax.swing.JButton saveFileButton;
+    private javax.swing.JButton selectFileButton;
     // End of variables declaration//GEN-END:variables
 }

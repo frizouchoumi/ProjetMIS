@@ -6,12 +6,25 @@
 package view;
 
 import controller.DoctorJpaController;
+import controller.DoctorgJpaController;
+import controller.PersonJpaController;
+import controller.PersongJpaController;
+import controller.exceptions.NonexistentEntityException;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import static java.lang.Integer.parseInt;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import model.Doctor;
+import model.Doctorg;
+import model.Person;
+import model.Persong;
 
 /**
  *
@@ -20,8 +33,17 @@ import model.Doctor;
 public class MainWindowPatient extends javax.swing.JFrame {
     
     
-    private final EntityManagerFactory emfac = Persistence.createEntityManagerFactory("misProjet");
-    private final DoctorJpaController doctorCtrl = new DoctorJpaController(emfac);
+    private final EntityManagerFactory emfac = Persistence.createEntityManagerFactory("databaseGlobale");
+    private final EntityManagerFactory emfacperso = Persistence.createEntityManagerFactory("misProjet");
+    private final DoctorgJpaController doctorgCtrl = new DoctorgJpaController(emfac);
+    private final DoctorJpaController doctorCtrl = new DoctorJpaController(emfacperso);
+    private final PersonJpaController personCtrl = new PersonJpaController(emfacperso);
+    
+    Doctorg doctorg = null;
+    Doctor doctor = null;
+    
+    
+    
 
 
     /**
@@ -47,8 +69,18 @@ public class MainWindowPatient extends javax.swing.JFrame {
         listDoctors = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         itemList = new javax.swing.JList<>();
+        jLabel1 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        ContactList = new javax.swing.JList<>();
+        jLabel2 = new javax.swing.JLabel();
+        contactButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                formMouseClicked(evt);
+            }
+        });
 
         listDoctors.setText("view existing doctors");
         listDoctors.addActionListener(new java.awt.event.ActionListener() {
@@ -64,6 +96,21 @@ public class MainWindowPatient extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(itemList);
 
+        jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel1.setText("Add doctor to your contacts by double clicking");
+
+        jScrollPane2.setViewportView(ContactList);
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel2.setText("Contacts : ");
+
+        contactButton.setText("view contacts");
+        contactButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                contactButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -72,17 +119,30 @@ public class MainWindowPatient extends javax.swing.JFrame {
                 .addGap(37, 37, 37)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(listDoctors)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(202, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
+                        .addComponent(contactButton, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(223, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(63, 63, 63)
+                .addGap(29, 29, 29)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(listDoctors)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(220, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 54, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addGap(18, 18, 18)
+                .addComponent(contactButton)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(22, 22, 22))
         );
 
         pack();
@@ -90,20 +150,96 @@ public class MainWindowPatient extends javax.swing.JFrame {
 
     
     private void refreshDoctorList(){
-        List doctors = doctorCtrl.findDoctorEntities();
-        EntityListModel<Doctor> model = new EntityListModel(doctors);
+        List doctors = doctorgCtrl.findDoctorgEntities();
+        
+        EntityListModel<Doctorg> model = new EntityListModel(doctors);
         
         itemList.setModel(model);
+    }
+    
+    private void refreshContactList(){
+        List contacts = doctorCtrl.findDoctorEntities();
+        
+        EntityListModel<Doctor> contact = new EntityListModel(contacts);
+        
+        ContactList.setModel(contact);
     }
     
     private void listDoctorsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_listDoctorsActionPerformed
         // TODO add your handling code here:
         refreshDoctorList();
     }//GEN-LAST:event_listDoctorsActionPerformed
-
+    
+    
+    
+    
     private void itemListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_itemListMouseClicked
         // TODO add your handling code here:
+        if (evt.getClickCount() == 2 && evt.getButton() == MouseEvent.BUTTON1 && itemList.getSelectedIndex() >= 0) {
+            
+            
+            EntityListModel model = (EntityListModel) itemList.getModel();
+         
+                
+            Doctorg selected = (Doctorg) model.getList().get(itemList.getSelectedIndex());
+            System.out.println("selected : " + selected);
+            if( doctor == null ){
+                doctor = new Doctor();
+            }
+
+
+            //cast persong into person
+            String doctor_name = selected.getPerson().getName();
+            String doctor_firstname = selected.getPerson().getFirstname();
+            Date doctor_date = selected.getPerson().getDateOfBirth();
+            int Inami = selected.getInami();
+
+            Person person = new Person();
+            person.setName(doctor_name);
+            person.setFirstname(doctor_firstname);
+            person.setDateOfBirth(doctor_date);
+
+
+            doctor.setPerson(person);
+            doctor.setInami(Inami);
+
+
+            // Create person if necessary:
+            if( doctor.getPerson().getId() == null ){
+                personCtrl.create(doctor.getPerson());           
+            }
+            // Create doctor if necessary
+            if( doctor.getId() == null ){
+                doctorCtrl.create(doctor);
+            }
+
+            // Save changes
+            try {
+                personCtrl.edit(doctor.getPerson());
+                doctorCtrl.edit(doctor);
+            } catch (NonexistentEntityException ex) {
+                Logger.getLogger(MainWindowPatient.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(MainWindowPatient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            
+            
+            refreshContactList(); 
+             
+        }
+        
     }//GEN-LAST:event_itemListMouseClicked
+
+    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_formMouseClicked
+
+    private void contactButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_contactButtonActionPerformed
+        // TODO add your handling code here:
+        refreshContactList();
+    }//GEN-LAST:event_contactButtonActionPerformed
 
     
     /**
@@ -142,8 +278,13 @@ public class MainWindowPatient extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JList<String> ContactList;
+    private javax.swing.JButton contactButton;
     private javax.swing.JList<String> itemList;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton listDoctors;
     // End of variables declaration//GEN-END:variables
 }

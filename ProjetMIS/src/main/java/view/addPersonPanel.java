@@ -9,7 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.Person;
+import model.Persong;
 
 /**
  *
@@ -17,7 +17,7 @@ import model.Person;
  */
 public class addPersonPanel extends javax.swing.JPanel {
     
-    private Person person = null;
+    private Persong person = null;
     private final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
@@ -27,7 +27,7 @@ public class addPersonPanel extends javax.swing.JPanel {
         initComponents();
     }
     
-    public void setPerson(Person person){
+    public void setPerson(Persong person){
         this.person = person;
         
         lastName.setText(person.getName());
@@ -35,9 +35,9 @@ public class addPersonPanel extends javax.swing.JPanel {
         dateOfBirth.setText(fmt.format(person.getDateOfBirth()));
     }
     
-    public Person getPerson(){
+    public Persong getPerson(){
         if( person == null ){
-            person = new Person();
+            person = new Persong();
         }
         
         person.setName(lastName.getText());

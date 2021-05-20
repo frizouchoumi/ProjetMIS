@@ -7,7 +7,6 @@ package model;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,7 +33,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Tags.findById", query = "SELECT t FROM Tags t WHERE t.id = :id"),
     @NamedQuery(name = "Tags.findByTagName", query = "SELECT t FROM Tags t WHERE t.tagName = :tagName")})
 public class Tags implements Serializable {
-    private List<Filetags> filetagsList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -107,14 +106,6 @@ public class Tags implements Serializable {
     @Override
     public String toString() {
         return "model.Tags[ id=" + id + " ]";
-    }
-    
-    public List<Filetags> getFileTagsList() {
-        return filetagsList;
-    }
-
-    public void setFileTagsList(List<Filetags> filetagsList) {
-        this.filetagsList = filetagsList;
     }
     
 }

@@ -6,9 +6,7 @@
 package model;
 
 import java.io.Serializable;
-import java.util.Collection;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,57 +16,53 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
  * @author Charlotte
  */
 @Entity
-@Table(name = "doctor")
+@Table(name = "doctorg")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Doctor.findAll", query = "SELECT d FROM Doctor d"),
-    @NamedQuery(name = "Doctor.findById", query = "SELECT d FROM Doctor d WHERE d.id = :id"),
-    @NamedQuery(name = "Doctor.findByInami", query = "SELECT d FROM Doctor d WHERE d.inami = :inami")})
-public class Doctor implements Serializable {
+    @NamedQuery(name = "Doctorg.findAll", query = "SELECT d FROM Doctorg d"),
+    @NamedQuery(name = "Doctorg.findByIDdoctor", query = "SELECT d FROM Doctorg d WHERE d.iDdoctor = :iDdoctor"),
+    @NamedQuery(name = "Doctorg.findByInami", query = "SELECT d FROM Doctorg d WHERE d.inami = :inami")})
+public class Doctorg implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "ID")
-    private Integer id;
+    @Column(name = "IDdoctor")
+    private Integer iDdoctor;
     @Basic(optional = false)
     @Column(name = "Inami")
     private int inami;
-    @JoinColumn(name = "Person", referencedColumnName = "ID")
+    @JoinColumn(name = "person", referencedColumnName = "IDperson")
     @ManyToOne(optional = false)
-    private Person person;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "doctor")
-    private Collection<File> fileCollection;
+    private Persong person;
 
-    public Doctor() {
+    public Doctorg() {
     }
 
-    public Doctor(Integer id) {
-        this.id = id;
+    public Doctorg(Integer iDdoctor) {
+        this.iDdoctor = iDdoctor;
     }
 
-    public Doctor(Integer id, int inami) {
-        this.id = id;
+    public Doctorg(Integer iDdoctor, int inami) {
+        this.iDdoctor = iDdoctor;
         this.inami = inami;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getIDdoctor() {
+        return iDdoctor;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setIDdoctor(Integer iDdoctor) {
+        this.iDdoctor = iDdoctor;
     }
 
     public int getInami() {
@@ -79,38 +73,29 @@ public class Doctor implements Serializable {
         this.inami = inami;
     }
 
-    public Person getPerson() {
+    public Persong getPerson() {
         return person;
     }
 
-    public void setPerson(Person person) {
+    public void setPerson(Persong person) {
         this.person = person;
-    }
-
-    @XmlTransient
-    public Collection<File> getFileCollection() {
-        return fileCollection;
-    }
-
-    public void setFileCollection(Collection<File> fileCollection) {
-        this.fileCollection = fileCollection;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (iDdoctor != null ? iDdoctor.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Doctor)) {
+        if (!(object instanceof Doctorg)) {
             return false;
         }
-        Doctor other = (Doctor) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        Doctorg other = (Doctorg) object;
+        if ((this.iDdoctor == null && other.iDdoctor != null) || (this.iDdoctor != null && !this.iDdoctor.equals(other.iDdoctor))) {
             return false;
         }
         return true;
@@ -119,6 +104,10 @@ public class Doctor implements Serializable {
     @Override
     public String toString() {
         return person.toString();
+    }
+
+    public Object getIDperson() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

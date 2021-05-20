@@ -6,9 +6,7 @@
 package model;
 
 import java.io.Serializable;
-import java.util.Collection;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,57 +16,53 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
  * @author Charlotte
  */
 @Entity
-@Table(name = "patient")
+@Table(name = "patientg")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Patient.findAll", query = "SELECT p FROM Patient p"),
-    @NamedQuery(name = "Patient.findById", query = "SELECT p FROM Patient p WHERE p.id = :id"),
-    @NamedQuery(name = "Patient.findBySocialSec", query = "SELECT p FROM Patient p WHERE p.socialSec = :socialSec")})
-public class Patient implements Serializable {
+    @NamedQuery(name = "Patientg.findAll", query = "SELECT p FROM Patientg p"),
+    @NamedQuery(name = "Patientg.findByIDpatient", query = "SELECT p FROM Patientg p WHERE p.iDpatient = :iDpatient"),
+    @NamedQuery(name = "Patientg.findBySocialSec", query = "SELECT p FROM Patientg p WHERE p.socialSec = :socialSec")})
+public class Patientg implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "ID")
-    private Integer id;
+    @Column(name = "IDpatient")
+    private Integer iDpatient;
     @Basic(optional = false)
     @Column(name = "SocialSec")
     private int socialSec;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "patient")
-    private Collection<File> fileCollection;
-    @JoinColumn(name = "Person", referencedColumnName = "ID")
+    @JoinColumn(name = "person", referencedColumnName = "IDperson")
     @ManyToOne(optional = false)
-    private Person person;
+    private Persong person;
 
-    public Patient() {
+    public Patientg() {
     }
 
-    public Patient(Integer id) {
-        this.id = id;
+    public Patientg(Integer iDpatient) {
+        this.iDpatient = iDpatient;
     }
 
-    public Patient(Integer id, int socialSec) {
-        this.id = id;
+    public Patientg(Integer iDpatient, int socialSec) {
+        this.iDpatient = iDpatient;
         this.socialSec = socialSec;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getIDpatient() {
+        return iDpatient;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setIDpatient(Integer iDpatient) {
+        this.iDpatient = iDpatient;
     }
 
     public int getSocialSec() {
@@ -79,38 +73,29 @@ public class Patient implements Serializable {
         this.socialSec = socialSec;
     }
 
-    @XmlTransient
-    public Collection<File> getFileCollection() {
-        return fileCollection;
-    }
-
-    public void setFileCollection(Collection<File> fileCollection) {
-        this.fileCollection = fileCollection;
-    }
-
-    public Person getPerson() {
+    public Persong getPerson() {
         return person;
     }
 
-    public void setPerson(Person person) {
+    public void setPerson(Persong person) {
         this.person = person;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (iDpatient != null ? iDpatient.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Patient)) {
+        if (!(object instanceof Patientg)) {
             return false;
         }
-        Patient other = (Patient) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        Patientg other = (Patientg) object;
+        if ((this.iDpatient == null && other.iDpatient != null) || (this.iDpatient != null && !this.iDpatient.equals(other.iDpatient))) {
             return false;
         }
         return true;
@@ -118,7 +103,7 @@ public class Patient implements Serializable {
 
     @Override
     public String toString() {
-        return person.toString();
+        return "model.Patientg[ iDpatient=" + iDpatient + " ]";
     }
     
 }

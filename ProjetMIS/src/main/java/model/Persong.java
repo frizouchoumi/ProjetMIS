@@ -7,10 +7,8 @@ package model;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,34 +16,32 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
  * @author Charlotte
  */
 @Entity
-@Table(name = "person")
+@Table(name = "persong")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Person.findAll", query = "SELECT p FROM Person p"),
-    @NamedQuery(name = "Person.findById", query = "SELECT p FROM Person p WHERE p.id = :id"),
-    @NamedQuery(name = "Person.findByName", query = "SELECT p FROM Person p WHERE p.name = :name"),
-    @NamedQuery(name = "Person.findByFirstname", query = "SELECT p FROM Person p WHERE p.firstname = :firstname"),
-    @NamedQuery(name = "Person.findByDateOfBirth", query = "SELECT p FROM Person p WHERE p.dateOfBirth = :dateOfBirth")})
-public class Person implements Serializable {
+    @NamedQuery(name = "Persong.findAll", query = "SELECT p FROM Persong p"),
+    @NamedQuery(name = "Persong.findByIDperson", query = "SELECT p FROM Persong p WHERE p.iDperson = :iDperson"),
+    @NamedQuery(name = "Persong.findByName", query = "SELECT p FROM Persong p WHERE p.name = :name"),
+    @NamedQuery(name = "Persong.findByFirstname", query = "SELECT p FROM Persong p WHERE p.firstname = :firstname"),
+    @NamedQuery(name = "Persong.findByDateOfBirth", query = "SELECT p FROM Persong p WHERE p.dateOfBirth = :dateOfBirth")})
+public class Persong implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "ID")
-    private Integer id;
+    @Column(name = "IDperson")
+    private Integer iDperson;
     @Basic(optional = false)
     @Column(name = "Name")
     private String name;
@@ -56,31 +52,27 @@ public class Person implements Serializable {
     @Column(name = "DateOfBirth")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateOfBirth;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "person")
-    private Collection<Doctor> doctorCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "person")
-    private Collection<Patient> patientCollection;
 
-    public Person() {
+    public Persong() {
     }
 
-    public Person(Integer id) {
-        this.id = id;
+    public Persong(Integer iDperson) {
+        this.iDperson = iDperson;
     }
 
-    public Person(Integer id, String name, String firstname, Date dateOfBirth) {
-        this.id = id;
+    public Persong(Integer iDperson, String name, String firstname, Date dateOfBirth) {
+        this.iDperson = iDperson;
         this.name = name;
         this.firstname = firstname;
         this.dateOfBirth = dateOfBirth;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getIDperson() {
+        return iDperson;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setIDperson(Integer iDperson) {
+        this.iDperson = iDperson;
     }
 
     public String getName() {
@@ -107,39 +99,21 @@ public class Person implements Serializable {
         this.dateOfBirth = dateOfBirth;
     }
 
-    @XmlTransient
-    public Collection<Doctor> getDoctorCollection() {
-        return doctorCollection;
-    }
-
-    public void setDoctorCollection(Collection<Doctor> doctorCollection) {
-        this.doctorCollection = doctorCollection;
-    }
-
-    @XmlTransient
-    public Collection<Patient> getPatientCollection() {
-        return patientCollection;
-    }
-
-    public void setPatientCollection(Collection<Patient> patientCollection) {
-        this.patientCollection = patientCollection;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (iDperson != null ? iDperson.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Person)) {
+        if (!(object instanceof Persong)) {
             return false;
         }
-        Person other = (Person) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        Persong other = (Persong) object;
+        if ((this.iDperson == null && other.iDperson != null) || (this.iDperson != null && !this.iDperson.equals(other.iDperson))) {
             return false;
         }
         return true;
